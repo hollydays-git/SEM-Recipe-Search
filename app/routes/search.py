@@ -1,35 +1,56 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
 from app.core.qdrant_client import qdrant
 from app.core.config import settings
 from sentence_transformers import SentenceTransformer
 
 router = APIRouter()
 
-# Use the same model used for uploading recipe embeddings
+# load the same model that was used for creating embeddings
 model = SentenceTransformer("intfloat/e5-base-v2")
 
+
 @router.get("/recipes/match")
-async def match_recipes(query: str = Query(..., description="User input text (e.g. ingredients or description)")):
+async def match_recipes(query: str = Query(..., description="Text input (ingredients, description, etc.)")):
     """
-    Match recipes based on user-provided text input (semantic search).
+    Find recipes that are semantically similar to the user’s query.
     """
 
-    # IMPORTANT: E5 model requires prefix and normalization
-    formatted_query = f"query: {query}"
-    query_vector = model.encode([formatted_query], normalize_embeddings=True)[0].tolist()
+    # basic cleanup
+    clean_query = query.strip().lower()
+    if not clean_query:
+        raise HTTPException(status_code=400, detail="Query cannot be empty.")
 
-    # Search in Qdrant
-    results = qdrant.search(
-        collection_name=settings.QDRANT_COLLECTION,
-        query_vector=query_vector,
-        limit=5
-    )
+    try:
+        # e5 models expect a prefix and normalized embeddings
+        formatted_query = f"query: {clean_query}"
+        query_vector = model.encode(
+            [formatted_query],
+            normalize_embeddings=True
+        )[0].tolist()
 
-    # Format the response
+        # search in qdrant
+        results = qdrant.search(
+            collection_name=settings.QDRANT_COLLECTION,
+            query_vector=query_vector,
+            limit=5
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+
+    # if nothing found
+    if not results:
+        return {
+            "query": query,
+            "results": [],
+            "message": "No similar recipes found. Try changing your keywords."
+        }
+
+    # format the output
     response = [
         {
             "id": hit.id,
-            "score": hit.score,
+            "score": round(hit.score, 3),
             "recipe_name": hit.payload.get("title"),
             "ingredients": hit.payload.get("ingredients"),
             "instructions": hit.payload.get("instructions"),
@@ -39,4 +60,3 @@ async def match_recipes(query: str = Query(..., description="User input text (e.
     ]
 
     return {"query": query, "results": response}
-

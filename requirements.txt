@@ -5,3 +5,4 @@ requests
 qdrant-client
 sentence-transformers
 pydantic-settings
+starlette
