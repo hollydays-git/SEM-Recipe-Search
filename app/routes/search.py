@@ -1,31 +1,40 @@
 from fastapi import APIRouter, Query
-from sentence_transformers import SentenceTransformer
-from app.core.qdrant_client import  qdrant
+from app.core.qdrant_client import qdrant
 from app.core.config import settings
+from sentence_transformers import SentenceTransformer
 
-router = APIRouter(prefix="/search", tags=["search"])
-model = SentenceTransformer("all-MiniLM-L6-v2")
+router = APIRouter()
 
+# initialize the model (once)
+model = SentenceTransformer("all-mpnet-base-v2")
 
-@router.get("/")
-def search_recipes(q: str = Query(..., description="Search query")):
+@router.get("/recipes/match")
+async def match_recipes(query: str = Query(..., description="User input text")):
+    """
+    Match recipes based on user-provided text input (e.g. ingredients or description).
+    """
 
-    #create embedding from user query
-    query_vector = model.encode(q).tolist()
+    # encode the input text into a vector
+    query_vector = model.encode(query).tolist()
 
-    #search in qdrant
-    search_result = qdrant.search(
+    # search similar recipes in Qdrant
+    results = qdrant.search(
         collection_name=settings.QDRANT_COLLECTION,
         query_vector=query_vector,
         limit=5
     )
 
-    #format result
-    results = [
+    # format response
+    response = [
         {
-            "name": hit.payload.get("name", "Unknown"),
-            "score": hit.score
-        } for hit in search_result
+            "id": hit.id,
+            "score": hit.score,
+            "recipe_name": hit.payload.get("title"),
+            "ingredients": hit.payload.get("ingredients"),
+            "instructions": hit.payload.get("instructions"),
+            "image_url": hit.payload.get("image_url")
+        }
+        for hit in results
     ]
 
-    return {"query": q, "results": results}
+    return {"query": query, "results": response}
