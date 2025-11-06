@@ -4,7 +4,7 @@ from app.routes import search, test_qdrant
 
 app = FastAPI(title="Recipe Search API")
 
-# ✅ CORS middleware (must pass the class, not a type)
+# CORS middleware (must pass the class, not a type)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -13,7 +13,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ Routers
+# routers
 app.include_router(search.router)
 app.include_router(test_qdrant.router)
 

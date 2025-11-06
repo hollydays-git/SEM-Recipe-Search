@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.core.qdrant_client import qdrant
+from app.core.qdrant_service import qdrant
 
 router = APIRouter(prefix="/test-qdrant", tags=["test"])
 

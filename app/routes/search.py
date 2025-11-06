@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Query, HTTPException
-from app.core.qdrant_client import qdrant
+from app.core.qdrant_service import qdrant
 from app.core.config import settings
 from sentence_transformers import SentenceTransformer
 
