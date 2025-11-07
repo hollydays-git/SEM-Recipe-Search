@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from app.routes import search, test_qdrant
+from app.routes import search, health
 
 app = FastAPI(title="Recipe Search API")
 
@@ -15,7 +15,7 @@ app.add_middleware(
 
 # routers
 app.include_router(search.router)
-app.include_router(test_qdrant.router)
+app.include_router(health.router)
 
 @app.get("/")
 def root():

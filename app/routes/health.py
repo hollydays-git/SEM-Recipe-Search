@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 from app.core.qdrant_service import qdrant
 
-router = APIRouter(prefix="/test-qdrant", tags=["test"])
+router = APIRouter(prefix="/health", tags=["system"])
 
-@router.get("/")
+@router.get("/qdrant")
 def test_connection():
     try:
         collections = qdrant.get_collections()

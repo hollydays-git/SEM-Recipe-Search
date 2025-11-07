@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from app.routes import search, test_qdrant
+from app.routes import search, health
 
 router = APIRouter()
 router.include_router(search.router)
-router.include_router(test_qdrant.router)
+router.include_router(health.router)
