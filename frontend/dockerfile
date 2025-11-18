@@ -12,7 +12,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Устанавливаем все зависимости (devDependencies нужны для сборки)
-RUN npm ci
+RUN npm install
 
 # Копируем весь исходный код
 COPY . .
