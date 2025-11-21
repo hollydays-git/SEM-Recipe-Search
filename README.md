@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # SEM-Recipe-Search
 Search for recipes by meaning, not just by words.
 =======
@@ -48,4 +47,14 @@ GET /recipes/match?query=chicken+garlic
     }
   ]
 }
->>>>>>> backend
+
+
+---
+
+To Run frontend 
+
+# You need to install npm
+# Install dependencies npm install
+# Configure the host of the backend at the .env file according to the .env.exm file in the Frontend folder
+# Run dev deployment npm run dev 
+# the frontend will be available at http://localhost:5173
