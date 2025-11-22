@@ -1,132 +1,108 @@
-// Mock data for recipes
-const mockRecipes = [
-  {
-    id: 1,
-    title: 'Classic Borscht',
-    description: 'Traditional Ukrainian beet soup',
-    ingredients: ['beet', 'cabbage', 'potato', 'meat', 'onion', 'carrot'],
-    cookingTime: 90,
-    difficulty: 'medium',
-    imageUrl: 'https://via.placeholder.com/300x200?text=Borscht'
-  },
-  {
-    id: 2,
-    title: 'Pasta Carbonara',
-    description: 'Italian pasta with bacon and creamy sauce',
-    ingredients: ['spaghetti', 'bacon', 'eggs', 'parmesan', 'garlic'],
-    cookingTime: 30,
-    difficulty: 'easy',
-    imageUrl: 'https://via.placeholder.com/300x200?text=Carbonara'
-  },
-  {
-    id: 3,
-    title: 'Greek Salad',
-    description: 'Fresh salad with feta and olives',
-    ingredients: ['tomatoes', 'cucumbers', 'feta', 'olives', 'onion', 'olive oil'],
-    cookingTime: 15,
-    difficulty: 'easy',
-    imageUrl: 'https://via.placeholder.com/300x200?text=Greek+Salad'
-  },
-  {
-    id: 4,
-    title: 'Chicken Teriyaki',
-    description: 'Japanese chicken in a sweet sauce',
-    ingredients: ['chicken', 'soy sauce', 'honey', 'ginger', 'garlic', 'rice'],
-    cookingTime: 45,
-    difficulty: 'medium',
-    imageUrl: 'https://via.placeholder.com/300x200?text=Teriyaki'
-  },
-  {
-    id: 5,
-    title: 'Pizza Margherita',
-    description: 'Classic Italian pizza',
-    ingredients: ['dough', 'tomato sauce', 'mozzarella', 'basil', 'olive oil'],
-    cookingTime: 30,
-    difficulty: 'medium',
-    imageUrl: 'https://via.placeholder.com/300x200?text=Margherita'
-  },
-  {
-    id: 6,
-    title: 'Tiramisu',
-    description: 'Italian dessert with coffee and mascarpone',
-    ingredients: ['mascarpone', 'ladyfingers', 'coffee', 'eggs', 'sugar', 'cocoa'],
-    cookingTime: 40,
-    difficulty: 'hard',
-    imageUrl: 'https://via.placeholder.com/300x200?text=Tiramisu'
-  }
-];
-
-// Simulate network delay
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+// Base URL for the backend API
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // API functions
 export const recipesAPI = {
   // Get all recipes
   getAllRecipes: async () => {
-    await delay(300);
-    console.log('API: Fetching all recipes');
-    return {
-      success: true,
-      data: mockRecipes
-    };
+    console.log('API: Fetching all recipes from backend');
+    try {
+      // Assuming backend has an endpoint for all recipes, e.g., /recipes/all
+      // If not, we might need to adjust based on exact backend routes
+      const response = await fetch(`${API_BASE_URL}/recipes/all`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return {
+        success: true,
+        data: data
+      };
+    } catch (error) {
+      console.error('API Error:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
   },
 
   // Search recipes by query
   searchRecipes: async (query) => {
-    await delay(500);
     console.log('API: Searching recipes with query:', query);
     
     if (!query || query.trim() === '') {
-      return {
-        success: true,
-        data: mockRecipes
-      };
+      return recipesAPI.getAllRecipes();
     }
 
-    const lowerQuery = query.toLowerCase();
-    const filtered = mockRecipes.filter(recipe => 
-      recipe.title.toLowerCase().includes(lowerQuery) ||
-      recipe.description.toLowerCase().includes(lowerQuery) ||
-      recipe.ingredients.some(ing => ing.toLowerCase().includes(lowerQuery))
-    );
+    try {
+      // Using the endpoint defined in README: GET /recipes/match?query=<text>
+      const response = await fetch(`${API_BASE_URL}/recipes/match?query=${encodeURIComponent(query)}`);
+      console.log(`${API_BASE_URL}/recipes/match?query=${encodeURIComponent(query)}`)
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-    return {
-      success: true,
-      data: filtered,
-      query: query
-    };
+      const data = await response.json();
+      
+      // The backend returns { query: "...", results: [...] }
+      // We need to map this to the format expected by the frontend components
+      return {
+        success: true,
+        data: data.results, // Backend returns 'results' array
+        query: data.query
+      };
+    } catch (error) {
+      console.error('API Error:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
   },
 
   // Get a recipe by ID
   getRecipeById: async (id) => {
-    await delay(300);
     console.log('API: Fetching recipe with ID:', id);
-    
-    const recipe = mockRecipes.find(r => r.id === parseInt(id));
-    
-    if (recipe) {
-      return {
-        success: true,
-        data: recipe
-      };
-    } else {
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipes/${id}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data) {
+        return {
+          success: true,
+          data: data
+        };
+      } else {
+        return {
+          success: false,
+          error: 'Recipe not found'
+        };
+      }
+    } catch (error) {
+      console.error('API Error:', error);
       return {
         success: false,
-        error: 'Recipe not found'
+        error: error.message
       };
     }
   },
 
-  // Add a new recipe (currently just logs)
+  // Add a new recipe
   addRecipe: async (recipeData) => {
-    await delay(500);
     console.log('API: Adding new recipe:', recipeData);
-    
-    // In future this will POST to a backend
-    // For now just return success
+    // Placeholder: Backend might not have POST /recipes yet based on provided info
+    // Returning mock success for now to prevent UI breaking if this feature is used
     return {
       success: true,
-      message: 'Recipe will be added after backend is connected',
+      message: 'Backend add endpoint not yet implemented',
       data: {
         id: Date.now(),
         ...recipeData
@@ -136,15 +112,11 @@ export const recipesAPI = {
 
   // Delete a recipe
   deleteRecipe: async (id) => {
-    await delay(300);
     console.log('API: Deleting recipe with ID:', id);
-    
+    // Placeholder
     return {
       success: true,
-      message: 'Recipe will be deleted after backend is connected'
+      message: 'Backend delete endpoint not yet implemented'
     };
   }
 };
-
-// Export mock data for development
-export { mockRecipes };
