@@ -18,6 +18,8 @@ The API will start on http://127.0.0.1:8000.
 Test Qdrant connection
 
 GET /test-qdrant/
+GET /health/qdrant
+
 
 
 → Returns Qdrant collections, helps to check if backend is connected to DB.
@@ -51,10 +53,18 @@ GET /recipes/match?query=chicken+garlic
 
 ---
 
-To Run frontend 
+## To Run frontend 
 
-# You need to install npm
-# Install dependencies npm install
-# Configure the host of the backend at the .env file according to the .env.exm file in the Frontend folder
-# Run dev deployment npm run dev 
-# the frontend will be available at http://localhost:5173
+1. You need to install npm:
+```bash
+npm install
+```
+this will install all nessesary dependanses
+
+2. Configure the host of the backend at the .env file according to the .env.exm file in the Frontend folder:
+
+3. Run dev deployment:
+ ```
+ npm run dev
+ ``` 
+now the frontend will be available at http://localhost:5173
