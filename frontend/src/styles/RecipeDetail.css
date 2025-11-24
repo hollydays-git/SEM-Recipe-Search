@@ -1,0 +1,98 @@
+.recipe-detail {
+  padding: 20px;
+}
+
+.recipe-detail-actions {
+  margin-bottom: 20px;
+}
+
+.recipe-detail-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 30px;
+}
+
+.recipe-detail-info {
+  flex: 1 1 320px;
+}
+
+.recipe-detail-image {
+  flex: 0 0 320px;
+}
+
+.recipe-detail-image img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.recipe-detail-image.compact {
+  flex: 0 0 500px;
+}
+
+.recipe-detail-ingredients {
+  margin-top: 16px;
+}
+
+.recipe-detail-ingredients h4 {
+  margin: 0 0 8px;
+}
+
+.recipe-detail-ingredients ul {
+  list-style: disc;
+  padding-left: 20px;
+  margin: 0;
+}
+
+.recipe-steps {
+  margin-bottom: 40px;
+}
+
+.recipe-step {
+  background: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+}
+
+.step-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.step-image {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.recipe-similar {
+  margin-top: 20px;
+}
+
+.recipe-similar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.loading,
+.error {
+  padding: 20px;
+  text-align: center;
+}
+
+.error {
+  color: #e74c3c;
+}

@@ -1,5 +1,5 @@
 # SEM-Recipe-Search
-Search for recipes by meaning, not just by words.
+Backend description
 =======
 How to run
 
@@ -15,41 +15,14 @@ The API will start on http://127.0.0.1:8000.
 
 ---------------------
 
-Test Qdrant connection
+- `GET /recipes` – paginated list for the dashboard.
+- `GET /recipes/{id}` – detailed recipe data including steps.
+- `GET /recipes/search?query=...` – simple title search (ILIKE).
+- `GET /recipes/match?query=...` – fuzzy Postgres search
+- `GET /recipes/{id}/similar` – similar recipes based on Qdrant.
+- `POST /recipes` – create recipe, store steps, and index in Qdrant.
 
-GET /test-qdrant/
-GET /health/qdrant
-
-
-
-→ Returns Qdrant collections, helps to check if backend is connected to DB.
-
-Search recipes
-
-GET /recipes/match?query=<text>
-
-
-Example:
-
-GET /recipes/match?query=chicken+garlic
-
-
-→ Returns JSON with similar recipes from the vector database:
-
-{
-  "query": "chicken garlic",
-  "results": [
-    {
-      "id": 123,
-      "score": 0.89,
-      "recipe_name": "Spicy Garlic Chicken",
-      "ingredients": "...",
-      "instructions": "...",
-      "image_url": "https://supabase.co/storage/images/..."
-    }
-  ]
-}
-
+All responses are JSON and follow the structures expected by the current React client (`frontend/src/api/recipes.js`).
 
 ---
 
@@ -66,5 +39,32 @@ this will install all nessesary dependanses
 3. Run dev deployment:
  ```
  npm run dev
- ``` 
+```
 now the frontend will be available at http://localhost:5173
+
+
+---
+
+## Standalone ONNX embedding service
+
+The `embedding_service/` folder contains an ONNX model and tokenizer. Install the dependencies (`pip install -r embedding_service/requirements.txt`) and run the server:
+
+```bash
+uvicorn embedding_service.main:app --host 0.0.0.0 --port 8100
+```
+
+Available endpoints:
+
+- `GET /health` – shows the loaded ONNX model and tokenizer.
+- `POST /embed` – accepts a list of texts and returns embeddings that can be inserted into Qdrant.
+
+Query example:
+
+```
+POST http://localhost:8100/embed
+{
+  "texts": ["passage: Mix chicken with garlic"]
+}
+```
+
+Response returns `embeddings` (list of vectors), `model` (model name) and `count` (number of returned vectors). Only `embeddings` is required for the backend to push data into Qdrant.
