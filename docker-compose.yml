@@ -4,10 +4,14 @@ services:
   backend:
     build:
       context: .
-      dockerfile: app/dockerfile 
+      dockerfile: app/Dockerfile
     container_name: backend
     env_file:
       - ./.env
+    depends_on:
+      - postgres
+      - qdrant
+      - embedding_service
     ports:
       - "8000:8000"
     networks:
@@ -19,12 +23,53 @@ services:
       dockerfile: Dockerfile
     container_name: frontend
     environment:
-      - VITE_API_BASE_URL=http://backend:8000
+      VITE_API_BASE_URL: "http://backend:8000"
     ports:
       - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  embedding_service:
+    build:
+      context: ./embedding_service
+      dockerfile: Dockerfile
+    container_name: embedding_service
+    ports:
+      - "8100:8100"
+    networks:
+      - app-network
+
+  qdrant:
+    image: qdrant/qdrant
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant-data:/qdrant/storage
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: recipes
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - app-network
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  postgres-data:
+  qdrant-data:
