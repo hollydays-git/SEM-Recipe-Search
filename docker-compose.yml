@@ -9,8 +9,7 @@ services:
     env_file:
       - ./.env
     environment:
-      # Локальный DSN для docker-compose
-      POSTGRES_DSN: postgresql://user:password@postgres:5432/recipes
+      POSTGRES_DSN: postgresql://postgres:fofcun-vEkcyt-jycpa9@db.lrazobemjqjpngtuofpv.supabase.co:5432/postgres
       EMBEDDING_SERVICE_URL: http://embedding_service:8100
       VITE_API_BASE_URL: http://backend:8000
     depends_on:
