@@ -9,17 +9,19 @@ services:
     env_file:
       - ./.env
     environment:
-      POSTGRES_DSN: postgresql://postgres:fofcun-vEkcyt-jycpa9@db.lrazobemjqjpngtuofpv.supabase.co:5432/postgres
+      POSTGRES_DSN: ${POSTGRES_DSN}
       EMBEDDING_SERVICE_URL: http://embedding_service:8100
       VITE_API_BASE_URL: http://backend:8000
     depends_on:
-      - postgres
       - qdrant
       - embedding_service
     ports:
       - "8000:8000"
     networks:
       - app-network
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
 
   frontend:
     build:
@@ -55,25 +57,10 @@ services:
     networks:
       - app-network
 
-  postgres:
-    image: postgres:15
-    container_name: postgres
-    restart: always
-    environment:
-      POSTGRES_DB: recipes
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - app-network
 
 networks:
   app-network:
     driver: bridge
 
 volumes:
-  postgres-data:
   qdrant-data:
