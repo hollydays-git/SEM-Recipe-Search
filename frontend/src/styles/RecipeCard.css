@@ -103,3 +103,12 @@
   color: white;
   font-weight: 600;
 }
+.recipe-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.recipe-card-link .recipe-card {
+  height: 100%;
+}
