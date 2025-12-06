@@ -7,33 +7,25 @@ services:
       dockerfile: app/Dockerfile
     container_name: backend
     env_file:
-      - ./.env
+      - .env
     environment:
-      POSTGRES_DSN: ${POSTGRES_DSN}
-      QDRANT_URL: ${QDRANT_URL}
-      QDRANT_API_KEY: ${QDRANT_API_KEY}
-      QDRANT_COLLECTION_NAME: ${QDRANT_COLLECTION_NAME}
-      EMBEDDING_SERVICE_URL: ${EMBEDDING_SERVICE_URL}
+      EMBEDDING_SERVICE_URL: "http://embedding_service:8100"
     depends_on:
       - embedding_service
     ports:
       - "8000:8000"
-    networks:
-      - app-network
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: frontend
-    depends_on:
-      - backend
+    environment:
+      VITE_API_BASE_URL: "http://backend:8000"
     ports:
       - "5173:5173"
-    networks:
-      - app-network
-    environment:
-      VITE_API_BASE_URL: http://backend:8000
+    depends_on:
+      - backend
 
   embedding_service:
     build:
@@ -42,9 +34,3 @@ services:
     container_name: embedding_service
     ports:
       - "8100:8100"
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
