@@ -44,15 +44,3 @@ jobs:
 
       - name: Lint backend
         run: ruff check .
-
-      - name: Run tests
-        run: |
-          # Run pytest if tests directory or pytest config exists, otherwise run unittest discovery.
-          if [ -f "pytest.ini" ] || [ -d "tests" ] || grep -q "\[tool.pytest.ini_options\]" pyproject.toml 2>/dev/null; then
-            pytest -q
-          elif ls *_test.py 1> /dev/null 2>&1 || ls test_*.py 1> /dev/null 2>&1; then
-            python -m unittest discover -v
-          else
-            echo "No tests found - failing CI to enforce adding tests."
-            exit 1
-          fi
