@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+    container_name: backend
+    env_file:
+      - .env
+    environment:
+      EMBEDDING_SERVICE_URL: "http://embedding_service:8100"
+    depends_on:
+      - embedding_service
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    environment:
+      VITE_API_BASE_URL: "http://backend:8000"
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  embedding_service:
+    build:
+      context: ./embedding_service
+      dockerfile: Dockerfile
+    container_name: embedding_service
+    ports:
+      - "8100:8100"

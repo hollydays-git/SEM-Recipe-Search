@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+requests
+qdrant-client
+sentence-transformers
+pydantic-settings
+starlette
+asyncpg
+httpx

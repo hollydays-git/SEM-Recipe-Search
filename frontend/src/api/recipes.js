@@ -1,132 +1,116 @@
-// Mock data for recipes
-const mockRecipes = [
-  {
-    id: 1,
-    title: 'Classic Borscht',
-    description: 'Traditional Ukrainian beet soup',
-    ingredients: ['beet', 'cabbage', 'potato', 'meat', 'onion', 'carrot'],
-    cookingTime: 90,
-    difficulty: 'medium',
-    imageUrl: 'https://via.placeholder.com/300x200?text=Borscht'
-  },
-  {
-    id: 2,
-    title: 'Pasta Carbonara',
-    description: 'Italian pasta with bacon and creamy sauce',
-    ingredients: ['spaghetti', 'bacon', 'eggs', 'parmesan', 'garlic'],
-    cookingTime: 30,
-    difficulty: 'easy',
-    imageUrl: 'https://via.placeholder.com/300x200?text=Carbonara'
-  },
-  {
-    id: 3,
-    title: 'Greek Salad',
-    description: 'Fresh salad with feta and olives',
-    ingredients: ['tomatoes', 'cucumbers', 'feta', 'olives', 'onion', 'olive oil'],
-    cookingTime: 15,
-    difficulty: 'easy',
-    imageUrl: 'https://via.placeholder.com/300x200?text=Greek+Salad'
-  },
-  {
-    id: 4,
-    title: 'Chicken Teriyaki',
-    description: 'Japanese chicken in a sweet sauce',
-    ingredients: ['chicken', 'soy sauce', 'honey', 'ginger', 'garlic', 'rice'],
-    cookingTime: 45,
-    difficulty: 'medium',
-    imageUrl: 'https://via.placeholder.com/300x200?text=Teriyaki'
-  },
-  {
-    id: 5,
-    title: 'Pizza Margherita',
-    description: 'Classic Italian pizza',
-    ingredients: ['dough', 'tomato sauce', 'mozzarella', 'basil', 'olive oil'],
-    cookingTime: 30,
-    difficulty: 'medium',
-    imageUrl: 'https://via.placeholder.com/300x200?text=Margherita'
-  },
-  {
-    id: 6,
-    title: 'Tiramisu',
-    description: 'Italian dessert with coffee and mascarpone',
-    ingredients: ['mascarpone', 'ladyfingers', 'coffee', 'eggs', 'sugar', 'cocoa'],
-    cookingTime: 40,
-    difficulty: 'hard',
-    imageUrl: 'https://via.placeholder.com/300x200?text=Tiramisu'
-  }
-];
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, '');
 
-// Simulate network delay
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const normalizeRecipe = (recipe = {}) => ({
+  id: recipe.id,
+  title: recipe.title,
+  description: recipe.description || '',
+  imageUrl: recipe.cover_url || recipe.image_url || '',
+  difficulty: recipe.difficulty || 'medium',
+  cookingTime: recipe.cooking_time ?? recipe.cookingTime ?? null,
+  popularity: recipe.popularity ?? null,
+  ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
+});
 
-// API functions
 export const recipesAPI = {
-  // Get all recipes
-  getAllRecipes: async () => {
-    await delay(300);
-    console.log('API: Fetching all recipes');
-    return {
-      success: true,
-      data: mockRecipes
-    };
+  getAllRecipes: async ({ limit = 50, offset = 0 } = {}) => {
+    console.log('API: Fetching recipes list');
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipes?limit=${limit}&offset=${offset}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return {
+        success: true,
+        data: (data.items || []).map(normalizeRecipe),
+        pagination: { limit: data.limit, offset: data.offset }
+      };
+    } catch (error) {
+      console.error('API Error:', error);
+      return { success: false, error: error.message };
+    }
   },
 
-  // Search recipes by query
   searchRecipes: async (query) => {
-    await delay(500);
     console.log('API: Searching recipes with query:', query);
-    
+
     if (!query || query.trim() === '') {
-      return {
-        success: true,
-        data: mockRecipes
-      };
+      return recipesAPI.getAllRecipes();
     }
 
-    const lowerQuery = query.toLowerCase();
-    const filtered = mockRecipes.filter(recipe => 
-      recipe.title.toLowerCase().includes(lowerQuery) ||
-      recipe.description.toLowerCase().includes(lowerQuery) ||
-      recipe.ingredients.some(ing => ing.toLowerCase().includes(lowerQuery))
-    );
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipes/match?query=${encodeURIComponent(query)}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-    return {
-      success: true,
-      data: filtered,
-      query: query
-    };
+      const data = await response.json();
+      return {
+        success: true,
+        data: (data.results || []).map(normalizeRecipe),
+        query: data.query
+      };
+    } catch (error) {
+      console.error('API Error:', error);
+      return { success: false, error: error.message };
+    }
   },
 
-  // Get a recipe by ID
   getRecipeById: async (id) => {
-    await delay(300);
     console.log('API: Fetching recipe with ID:', id);
-    
-    const recipe = mockRecipes.find(r => r.id === parseInt(id));
-    
-    if (recipe) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipes/${id}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
       return {
         success: true,
-        data: recipe
+        data: {
+          ...normalizeRecipe(data),
+          steps: data.steps || []
+        }
       };
-    } else {
-      return {
-        success: false,
-        error: 'Recipe not found'
-      };
+    } catch (error) {
+      console.error('API Error:', error);
+      return { success: false, error: error.message };
     }
   },
 
-  // Add a new recipe (currently just logs)
+  getSimilarRecipes: async (id, { limit = 5 } = {}) => {
+    console.log('API: Fetching similar recipes for ID:', id);
+    try {
+      const response = await fetch(`${API_BASE_URL}/recipes/${id}/similar?limit=${limit}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const items = (data.items || []).map((item) => {
+        const normalized = normalizeRecipe(item);
+        if (typeof item.score !== 'undefined') {
+          normalized.score = item.score;
+        }
+        return normalized;
+      });
+
+      return { success: true, data: items };
+    } catch (error) {
+      console.error('API Error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Add a new recipe
   addRecipe: async (recipeData) => {
-    await delay(500);
     console.log('API: Adding new recipe:', recipeData);
-    
-    // In future this will POST to a backend
-    // For now just return success
+    // Placeholder: Backend might not have POST /recipes yet based on provided info
+    // Returning mock success for now to prevent UI breaking if this feature is used
     return {
       success: true,
-      message: 'Recipe will be added after backend is connected',
+      message: 'Backend add endpoint not yet implemented',
       data: {
         id: Date.now(),
         ...recipeData
@@ -136,15 +120,11 @@ export const recipesAPI = {
 
   // Delete a recipe
   deleteRecipe: async (id) => {
-    await delay(300);
     console.log('API: Deleting recipe with ID:', id);
-    
+    // Placeholder
     return {
       success: true,
-      message: 'Recipe will be deleted after backend is connected'
+      message: 'Backend delete endpoint not yet implemented'
     };
   }
 };
-
-// Export mock data for development
-export { mockRecipes };

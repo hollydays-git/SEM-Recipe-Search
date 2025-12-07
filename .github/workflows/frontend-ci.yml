@@ -1,0 +1,41 @@
+name: Frontend CI
+
+on:
+  push:
+    branches:
+      [ "main", 'aivanov_connect_backend_and_frontend' ]
+  pull_request:
+    branches:
+      [ "main", 'aivanov_connect_backend_and_frontend']
+
+jobs:
+  build-and-test:
+    name: Install · Build · Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./frontend
+        env:
+          CI: true
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: ./frontend
+        env:
+          CI: true
+
+      # - name: Run tests
+      #   run: npm test
+      #   working-directory: ./frontend
+      #   env:
+      #     CI: true
