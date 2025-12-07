@@ -38,7 +38,7 @@ async def create_recipe(payload: RecipeCreateRequest):
 
 @router.get("/{recipe_id}/similar")
 async def similar_recipes(recipe_id: int, limit: int = Query(5, ge=1, le=20)):
-    results = await recipe_recommendations.fetch_similar_recipes(recipe_id, limit)
+    results = await recipe_recommendations.fetch_similar_recipes_by_id(recipe_id, limit)
     if results is None:
         raise HTTPException(status_code=404, detail="Recipe not found")
     return {"items": results, "limit": limit}
