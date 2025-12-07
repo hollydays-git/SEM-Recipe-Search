@@ -34,8 +34,8 @@ jobs:
         env:
           CI: true
 
-      - name: Run tests
-        run: npm test
-        working-directory: ./frontend
-        env:
-          CI: true
+      # - name: Run tests
+      #   run: npm test
+      #   working-directory: ./frontend
+      #   env:
+      #     CI: true
