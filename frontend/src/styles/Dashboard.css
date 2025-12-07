@@ -43,6 +43,39 @@
   border-radius: 10px;
 }
 
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 25px 0;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #f3f3f3;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination button.active {
+  background: #3498db;
+  color: #fff;
+  border-color: #3498db;
+}
+
 @media (max-width: 768px) {
   .recipes-grid {
     grid-template-columns: 1fr;
