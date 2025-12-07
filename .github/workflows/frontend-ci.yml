@@ -24,15 +24,18 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        working-directory: ./frontend
         env:
           CI: true
 
       - name: Build frontend
         run: npm run build
+        working-directory: ./frontend
         env:
           CI: true
 
       - name: Run tests
         run: npm test
+        working-directory: ./frontend
         env:
           CI: true
