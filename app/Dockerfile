@@ -6,18 +6,15 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# requirements из КОРНЯ проекта
+# copy requirements from root of repo
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-# копируем весь backend-код
+# copy backend folder
 COPY app/ app/
 ENV PYTHONPATH=/app
 
-# открываем порт
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
-
-
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
